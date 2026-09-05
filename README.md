@@ -60,6 +60,40 @@ consegue criar uma conta de administrador).
   (atribuindo a um guarda específico ou à escala geral) e criar novos canais
   de rádio.
 
+## Notificações push (mesmo com o app fechado)
+
+Isso exige upgrade do projeto para o plano **Blaze** (pede cartão de crédito
+cadastrado, mas o uso normal desse app fica sempre dentro da faixa gratuita
+generosa do Blaze — Cloud Functions dá 2 milhões de execuções grátis por mês).
+
+1. No [console do Firebase](https://console.firebase.google.com), clique em
+   "Fazer upgrade" (perto de "Plano Spark") e mude para o plano Blaze.
+2. Vá em Configurações do projeto (ícone de engrenagem) → aba
+   **Cloud Messaging** → seção "Web Push certificates" → clique em
+   "Generate key pair". Copie a chave gerada.
+3. Abra `index.html`, procure `const VAPID_KEY = "COLE_AQUI_A_CHAVE_VAPID";`
+   e cole a chave no lugar.
+4. Instale o Node.js (se não tiver) e depois o Firebase CLI:
+   ```
+   npm install -g firebase-tools
+   firebase login
+   ```
+5. Pelo terminal, entre nesta pasta do projeto e rode:
+   ```
+   firebase deploy --only functions
+   ```
+   Isso publica as duas funções (`notifyNewCompromisso` e
+   `notifyEmergency`) que disparam a notificação sempre que um compromisso
+   novo é cadastrado ou uma emergência é acionada.
+6. Suba o `index.html` e o `sw.js` atualizados para o GitHub Pages (eles
+   agora pedem permissão de notificação e registram o token do aparelho).
+7. Peça para cada guarda abrir o app pelo menos uma vez e aceitar a
+   permissão de notificação — sem isso, o aparelho dele não recebe nada.
+
+**Opcional, recomendado:** configure um alerta de orçamento gratuito em
+Google Cloud Console → Faturamento → Orçamentos e alertas, por exemplo
+"avisar por e-mail se ultrapassar R$ 5", para nunca ser surpreendido.
+
 ## Limitações conhecidas (para próximas melhorias)
 
 - O rádio conecta os aparelhos diretamente entre si (sem servidor de mídia).

@@ -313,6 +313,11 @@
   </div>
 
   <!-- SOS -->
+  <svg class="sos-progress" id="sosProgress" viewBox="0 0 60 60">
+    <circle cx="30" cy="30" r="27" fill="none" stroke="#fff" stroke-width="4" opacity="0.35"/>
+    <circle id="sosProgressRing" cx="30" cy="30" r="27" fill="none" stroke="#ffe3b0" stroke-width="4"
+      stroke-dasharray="169.6" stroke-dashoffset="169.6" transform="rotate(-90 30 30)"/>
+  </svg>
   <button class="sos-btn" id="sosBtn">SOS</button>
 
   <!-- TAB BAR -->
@@ -407,6 +412,9 @@ import {
   getDatabase, ref, set, get, push, onValue, remove, update,
   onDisconnect, serverTimestamp, child
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import {
+  getMessaging, getToken, onMessage
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-messaging.js";
 
 /* ============================================================
    FIREBASE SETUP
@@ -425,7 +433,11 @@ const auth = getAuth(fbApp);
 const db = getDatabase(fbApp);
 
 // Troque esta senha por uma só sua e avise apenas quem for administrador de verdade.
-const ADMIN_CODE = "pKZTkc6MOpf!N$9q";
+const ADMIN_CODE = "SAOJOSE-ADMIN-2026";
+
+// Chave gerada em: Configurações do projeto > Cloud Messaging > Certificados push da Web
+const VAPID_KEY = "BIT8tOmEN_8RH3dVDkWRRZqJHIhutJ3xAqQd-uZ-hAPuxSZkqd6ue18wU_4tUl06Rdz5DEEGyuOdmJfddcWnpao";
+let messaging = null;
 
 let currentUser = null;   // { uid, email }
 let myProfile = null;     // { name, role }
@@ -570,7 +582,16 @@ function bootstrapApp(profile){
   watchCompromissos();
   watchChannels();
   watchEmergencies();
-  maybeRequestNotifPermission();
+  requestNotifPermissionThenSetupPush();
+}
+
+async function requestNotifPermissionThenSetupPush(){
+  if('Notification' in window){
+    if(Notification.permission === 'default'){
+      await Notification.requestPermission();
+    }
+  }
+  setupPushNotifications();
 }
 
 function teardownAll(){
@@ -754,8 +775,26 @@ function beep(){
     });
   }catch(e){}
 }
-function maybeRequestNotifPermission(){
-  if('Notification' in window && Notification.permission==='default'){ Notification.requestPermission(); }
+async function setupPushNotifications(){
+  try{
+    if(!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    if(Notification.permission !== 'granted') return;
+    const reg = await navigator.serviceWorker.register('sw.js');
+    messaging = getMessaging(fbApp);
+    const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: reg });
+    if(token){ await set(ref(db, 'fcmTokens/'+currentUser.uid+'/'+token), true); }
+    onMessage(messaging, (payload)=>{
+      const n = payload.notification || {};
+      showGenericNotification(n.title || 'Guarda de São José', n.body || '');
+    });
+  }catch(e){ console.warn('Não foi possível ativar notificações push', e); }
+}
+
+function showGenericNotification(title, body){
+  $('alarmTitle').textContent = title;
+  $('alarmTime').textContent = body;
+  $('alarmBanner').style.transform = 'translateX(-50%) translateY(0)';
+  beep();
 }
 function showAlarmBanner(item){
   $('alarmTitle').textContent = item.title;
@@ -781,7 +820,12 @@ setInterval(()=>{ if(myProfile) renderAgenda(); }, 30000);
 /* ============================================================
    RÁDIO — canais + WebRTC + sinalização via Firebase Realtime DB
    ============================================================ */
-const ICE_SERVERS = [{ urls: 'stun:stun.l.google.com:19302' }];
+const ICE_SERVERS = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+  { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+  { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
+];
 let channels = {};
 let activeChannelId = null;
 let localStream = null;
@@ -908,7 +952,11 @@ function ensurePeer(peerId){
     }
     audioEl.srcObject = e.streams[0];
   };
-  pc.onconnectionstatechange = ()=>{ if(['failed','disconnected','closed'].includes(pc.connectionState)) cleanupPeer(peerId); };
+  pc.onconnectionstatechange = ()=>{
+    if(knownPeers[peerId]) knownPeers[peerId].connState = pc.connectionState;
+    renderParticipants();
+    if(['failed','disconnected','closed'].includes(pc.connectionState)) cleanupPeer(peerId);
+  };
   return entry;
 }
 function cleanupPeer(peerId){
@@ -958,9 +1006,12 @@ function renderParticipants(){
   const ids = Object.keys(knownPeers);
   $('participantCount').textContent = (ids.length+1) + ' conectado' + (ids.length===0?'':'s');
   const me = `<li class="${talking?'talking':''}"><span class="dot"></span><span class="pname">${escapeHtml(myProfile.name)} (você)</span><span class="ptag">${talking?'no ar':'ouvindo'}</span></li>`;
+  const stateLabel = { new:'conectando…', connecting:'conectando…', connected:'conectado', disconnected:'reconectando…', failed:'falha na conexão', closed:'desconectado' };
   const others = ids.map(pid=>{
     const p = knownPeers[pid];
-    return `<li class="${p.talking?'talking':''}"><span class="dot"></span><span class="pname">${escapeHtml(p.name)}</span><span class="ptag">${p.talking?'no ar':'ouvindo'}</span></li>`;
+    const st = peers[pid] ? peers[pid].pc.connectionState : 'connecting';
+    const label = p.talking ? 'no ar' : (stateLabel[st] || 'conectando…');
+    return `<li class="${p.talking?'talking':''}"><span class="dot"></span><span class="pname">${escapeHtml(p.name)}</span><span class="ptag">${label}</span></li>`;
   }).join('');
   list.innerHTML = me + others;
 }
@@ -987,6 +1038,7 @@ const pttBtn = $('pttBtn');
 function startTalk(e){
   e.preventDefault();
   if(!localStream || !activeChannelId) return;
+  try{ pttBtn.setPointerCapture(e.pointerId); }catch(err){}
   talking = true;
   localStream.getAudioTracks().forEach(t=>t.enabled=true);
   pttBtn.classList.add('active'); pttBtn.innerHTML = 'No ar';
@@ -1064,21 +1116,40 @@ let dismissedIds = new Set();
 let currentSosId = null;
 
 const sosBtn = $('sosBtn');
+const sosRing = $('sosProgressRing');
+const SOS_HOLD_MS = 1500;
+const SOS_RING_LENGTH = 169.6;
+let sosStartTime = null;
+let sosRAF = null;
+
+function sosAnimate(){
+  const elapsed = Date.now() - sosStartTime;
+  const pct = Math.min(elapsed / SOS_HOLD_MS, 1);
+  sosRing.setAttribute('stroke-dashoffset', String(SOS_RING_LENGTH * (1 - pct)));
+  if(pct < 1){ sosRAF = requestAnimationFrame(sosAnimate); }
+}
 function sosStart(e){
   e.preventDefault();
+  try{ sosBtn.setPointerCapture(e.pointerId); }catch(err){}
   sosBtn.classList.add('charging');
-  sosPressTimer = setTimeout(triggerSOS, 2000);
+  sosStartTime = Date.now();
+  sosRAF = requestAnimationFrame(sosAnimate);
+  sosPressTimer = setTimeout(triggerSOS, SOS_HOLD_MS);
 }
 function sosCancel(){
   sosBtn.classList.remove('charging');
   clearTimeout(sosPressTimer);
+  cancelAnimationFrame(sosRAF);
+  sosRing.setAttribute('stroke-dashoffset', String(SOS_RING_LENGTH));
 }
 sosBtn.addEventListener('pointerdown', sosStart);
 sosBtn.addEventListener('pointerup', sosCancel);
-sosBtn.addEventListener('pointerleave', sosCancel);
+sosBtn.addEventListener('pointercancel', sosCancel);
 
 async function triggerSOS(){
   sosBtn.classList.remove('charging');
+  sosRing.setAttribute('stroke-dashoffset', String(SOS_RING_LENGTH));
+  if(navigator.vibrate) navigator.vibrate([120,60,120,60,200]);
   let lat=null, lng=null;
   try{
     const pos = await new Promise((res,rej)=> navigator.geolocation.getCurrentPosition(res, rej, {timeout:4000}));

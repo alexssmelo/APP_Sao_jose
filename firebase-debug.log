@@ -1,0 +1,166 @@
+[debug] [2026-09-05T23:33:12.477Z] ----------------------------------------------------------------------
+[debug] [2026-09-05T23:33:12.479Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only functions
+[debug] [2026-09-05T23:33:12.479Z] CLI Version:   15.29.0
+[debug] [2026-09-05T23:33:12.479Z] Platform:      win32
+[debug] [2026-09-05T23:33:12.479Z] Node Version:  v24.20.0
+[debug] [2026-09-05T23:33:12.479Z] Detected Agent: unknown
+[debug] [2026-09-05T23:33:12.480Z] Time:          Sat Sep 05 2026 20:33:12 GMT-0300 (Horário Padrão de Brasília)
+[debug] [2026-09-05T23:33:12.480Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-09-05T23:33:13.724Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-09-05T23:33:13.724Z] > authorizing via signed-in user (alexssmelo@gmail.com)
+[debug] [2026-09-05T23:33:13.724Z] [iam] checking project guarda-sao-jose for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2026-09-05T23:33:13.734Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:13.734Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:13.735Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/guarda-sao-jose:testIamPermissions [none]
+[debug] [2026-09-05T23:33:13.735Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/guarda-sao-jose:testIamPermissions  x-goog-user-project=guarda-sao-jose
+[debug] [2026-09-05T23:33:13.735Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/guarda-sao-jose:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2026-09-05T23:33:14.794Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/guarda-sao-jose:testIamPermissions 200
+[debug] [2026-09-05T23:33:14.794Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/guarda-sao-jose:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2026-09-05T23:33:14.794Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:14.794Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:14.794Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/guarda-sao-jose/serviceAccounts/guarda-sao-jose@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2026-09-05T23:33:14.794Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/guarda-sao-jose/serviceAccounts/guarda-sao-jose@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2026-09-05T23:33:16.084Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/guarda-sao-jose/serviceAccounts/guarda-sao-jose@appspot.gserviceaccount.com:testIamPermissions 404
+[debug] [2026-09-05T23:33:16.084Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/guarda-sao-jose/serviceAccounts/guarda-sao-jose@appspot.gserviceaccount.com:testIamPermissions {"error":{"code":404,"message":"Unknown service account","status":"NOT_FOUND"}}
+[debug] [2026-09-05T23:33:16.085Z] [functions] service account IAM check errored, deploy may fail: Request to https://iam.googleapis.com/v1/projects/guarda-sao-jose/serviceAccounts/guarda-sao-jose@appspot.gserviceaccount.com:testIamPermissions had HTTP Error: 404, Unknown service account {"name":"FirebaseError","children":[],"context":{"body":{"error":{"code":404,"message":"Unknown service account","status":"NOT_FOUND"}},"response":{"statusCode":404}},"exit":1,"message":"Request to https://iam.googleapis.com/v1/projects/guarda-sao-jose/serviceAccounts/guarda-sao-jose@appspot.gserviceaccount.com:testIamPermissions had HTTP Error: 404, Unknown service account","status":404}
+[info] 
+[info] === Deploying to 'guarda-sao-jose'...
+[info] 
+[info] i  deploying functions 
+[debug] [2026-09-05T23:33:16.088Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:16.088Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:16.088Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/cloudresourcemanager.googleapis.com [none]
+[debug] [2026-09-05T23:33:16.088Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/cloudresourcemanager.googleapis.com  x-goog-user-project=guarda-sao-jose
+[debug] [2026-09-05T23:33:17.353Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/cloudresourcemanager.googleapis.com 200
+[debug] [2026-09-05T23:33:17.353Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/cloudresourcemanager.googleapis.com [omitted]
+[debug] [2026-09-05T23:33:17.356Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:17.356Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:17.356Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/guarda-sao-jose [none]
+[debug] [2026-09-05T23:33:17.722Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/guarda-sao-jose 200
+[debug] [2026-09-05T23:33:17.722Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/guarda-sao-jose {"projectNumber":"630417916017","projectId":"guarda-sao-jose","lifecycleState":"ACTIVE","name":"guarda-sao-jose","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2026-09-05T20:20:35.624Z"}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[debug] [2026-09-05T23:33:17.724Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:17.724Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:17.724Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:17.724Z] Checked if tokens are valid: true, expires at: 1788654443344
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[debug] [2026-09-05T23:33:17.725Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:17.725Z] Checked if tokens are valid: true, expires at: 1788654443344
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2026-09-05T23:33:17.725Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:17.725Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:17.725Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/cloudfunctions.googleapis.com [none]
+[debug] [2026-09-05T23:33:17.725Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/cloudfunctions.googleapis.com  x-goog-user-project=guarda-sao-jose
+[debug] [2026-09-05T23:33:17.725Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/runtimeconfig.googleapis.com [none]
+[debug] [2026-09-05T23:33:17.726Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/runtimeconfig.googleapis.com  x-goog-user-project=guarda-sao-jose
+[debug] [2026-09-05T23:33:17.727Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/cloudbuild.googleapis.com [none]
+[debug] [2026-09-05T23:33:17.727Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/cloudbuild.googleapis.com  x-goog-user-project=guarda-sao-jose
+[debug] [2026-09-05T23:33:17.727Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/artifactregistry.googleapis.com [none]
+[debug] [2026-09-05T23:33:17.727Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/artifactregistry.googleapis.com  x-goog-user-project=guarda-sao-jose
+[debug] [2026-09-05T23:33:18.188Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/cloudfunctions.googleapis.com 200
+[debug] [2026-09-05T23:33:18.188Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/cloudfunctions.googleapis.com [omitted]
+[warn] !  functions: missing required API cloudfunctions.googleapis.com. Enabling now... 
+[debug] [2026-09-05T23:33:18.189Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:18.189Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:18.189Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/cloudfunctions.googleapis.com:enable [none]
+[debug] [2026-09-05T23:33:18.189Z] >>> [apiv2][(partial)header] POST https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/cloudfunctions.googleapis.com:enable  x-goog-user-project=guarda-sao-jose
+[debug] [2026-09-05T23:33:18.893Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/runtimeconfig.googleapis.com 200
+[debug] [2026-09-05T23:33:18.893Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/runtimeconfig.googleapis.com [omitted]
+[debug] [2026-09-05T23:33:18.908Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/cloudbuild.googleapis.com 200
+[debug] [2026-09-05T23:33:18.908Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/cloudbuild.googleapis.com [omitted]
+[warn] !  functions: missing required API cloudbuild.googleapis.com. Enabling now... 
+[debug] [2026-09-05T23:33:18.908Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:18.909Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:18.909Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/cloudbuild.googleapis.com:enable [none]
+[debug] [2026-09-05T23:33:18.909Z] >>> [apiv2][(partial)header] POST https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/cloudbuild.googleapis.com:enable  x-goog-user-project=guarda-sao-jose
+[debug] [2026-09-05T23:33:18.919Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/artifactregistry.googleapis.com 200
+[debug] [2026-09-05T23:33:18.919Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/artifactregistry.googleapis.com [omitted]
+[warn] !  artifactregistry: missing required API artifactregistry.googleapis.com. Enabling now... 
+[debug] [2026-09-05T23:33:18.919Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:18.919Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:18.919Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/artifactregistry.googleapis.com:enable [none]
+[debug] [2026-09-05T23:33:18.919Z] >>> [apiv2][(partial)header] POST https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/artifactregistry.googleapis.com:enable  x-goog-user-project=guarda-sao-jose
+[debug] [2026-09-05T23:33:19.198Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/cloudfunctions.googleapis.com:enable 200
+[debug] [2026-09-05T23:33:19.198Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/cloudfunctions.googleapis.com:enable [omitted]
+[debug] [2026-09-05T23:33:20.369Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/artifactregistry.googleapis.com:enable 200
+[debug] [2026-09-05T23:33:20.370Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/artifactregistry.googleapis.com:enable [omitted]
+[debug] [2026-09-05T23:33:20.415Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/cloudbuild.googleapis.com:enable 200
+[debug] [2026-09-05T23:33:20.415Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1/projects/guarda-sao-jose/services/cloudbuild.googleapis.com:enable [omitted]
+[debug] [2026-09-05T23:33:30.422Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:30.422Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:30.422Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/guarda-sao-jose/adminSdkConfig [none]
+[debug] [2026-09-05T23:33:31.006Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/guarda-sao-jose/adminSdkConfig 200
+[debug] [2026-09-05T23:33:31.006Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/guarda-sao-jose/adminSdkConfig {"projectId":"guarda-sao-jose","databaseURL":"https://guarda-sao-jose-default-rtdb.firebaseio.com","storageBucket":"guarda-sao-jose.firebasestorage.app"}
+[debug] [2026-09-05T23:33:31.006Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:31.007Z] Checked if tokens are valid: true, expires at: 1788654443344
+[debug] [2026-09-05T23:33:31.007Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/guarda-sao-jose/configs [none]
+[debug] [2026-09-05T23:33:32.326Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/guarda-sao-jose/configs 200
+[debug] [2026-09-05T23:33:32.326Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/guarda-sao-jose/configs {}
+[debug] [2026-09-05T23:33:32.328Z] Validating nodejs source
+[warn] !  functions: Runtime Node.js 20 was deprecated on 2026-04-30 and will be decommissioned on 2026-10-30, after which you will not be able to deploy without upgrading. Consider upgrading now to avoid disruption. See https://cloud.google.com/functions/docs/runtime-support for full details on the lifecycle policy 
+[warn] !  functions: Couldn't find firebase-functions package in your source code. Have you run 'npm install'? 
+[debug] [2026-09-05T23:33:32.329Z] getFunctionsSDKVersion encountered error: Cannot find module 'firebase-functions'
+Require stack:
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\runtimes\node\versioning.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\runtimes\node\index.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\runtimes\index.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\prepare.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\emulator\functionsEmulatorShared.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\frameworks\index.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\hosting\prepare.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\hosting\index.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\index.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\checkValidTargetFilters.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\commands\deploy.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\commands\index.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\index.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\cli.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js {"code":"MODULE_NOT_FOUND","requireStack":["C:\\Users\\alexs\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\deploy\\functions\\runtimes\\node\\versioning.js","C:\\Users\\alexs\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\deploy\\functions\\runtimes\\node\\index.js","C:\\Users\\alexs\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\deploy\\functions\\runtimes\\index.js","C:\\Users\\alexs\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\deploy\\functions\\prepare.js","C:\\Users\\alexs\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\emulator\\functionsEmulatorShared.js","C:\\Users\\alexs\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\frameworks\\index.js","C:\\Users\\alexs\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\deploy\\hosting\\prepare.js","C:\\Users\\alexs\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\deploy\\hosting\\index.js","C:\\Users\\alexs\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\deploy\\index.js","C:\\Users\\alexs\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\checkValidTargetFilters.js","C:\\Users\\alexs\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\commands\\deploy.js","C:\\Users\\alexs\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\commands\\index.js","C:\\Users\\alexs\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\index.js","C:\\Users\\alexs\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\bin\\cli.js","C:\\Users\\alexs\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\bin\\firebase.js"]}
+[debug] [2026-09-05T23:33:32.329Z] checkFunctionsSDKVersion encountered error: Invalid Version:  {}
+[debug] [2026-09-05T23:33:32.330Z] > [functions] package.json contents: {
+  "name": "functions",
+  "description": "Cloud Functions da Guarda de São José — notificações push",
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "firebase-admin": "^12.1.0",
+    "firebase-functions": "^5.0.0"
+  },
+  "private": true
+}
+[debug] [2026-09-05T23:33:32.330Z] Building nodejs source
+[info] i  functions: Loading and analyzing source code for codebase default to determine what to deploy 
+[debug] [2026-09-05T23:33:32.331Z] Could not parse firebase-functions version '' into semver.
+[debug] [2026-09-05T23:33:32.331Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-09-05T23:33:32.452Z] Error: Cannot find module 'firebase-functions'
+Require stack:
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\runtimes\node\index.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\runtimes\index.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\prepare.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\emulator\functionsEmulatorShared.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\frameworks\index.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\hosting\prepare.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\hosting\index.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\index.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\checkValidTargetFilters.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\commands\deploy.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\commands\index.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\index.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\cli.js
+- C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1564:15)
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)
+    at require.resolve (node:internal/modules/helpers:175:31)
+    at Delegate.findFunctionsBinary (C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\runtimes\node\index.js:98:33)
+    at Delegate.spawnFunctionsProcess (C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\runtimes\node\index.js:128:30)
+    at Delegate.serveAdmin (C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\runtimes\node\index.js:149:35)
+    at Delegate.discoverBuild (C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\runtimes\node\index.js:192:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async loadCodebases (C:\Users\alexs\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\prepare.js:532:33)
+[error] 
+[error] Error: An unexpected error has occurred.
