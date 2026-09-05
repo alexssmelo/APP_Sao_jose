@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Guarda de São José — Bairro do Alegre</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4a231b">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  :root{
+    --navy-950:#33170f; --navy-900:#4a231b; --navy-800:#63312a; --navy-700:#7c4436;
+    --gold-500:#c9a24b; --gold-400:#dfc07a;
+    --cream-100:#faf6ee; --cream-200:#efe4d1;
+    --ink:#1a1a1a; --red-600:#a8402b; --green-600:#3f6b4a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--cream-100);color:var(--ink);font-family:'Source Sans 3',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
+  .app{max-width:520px;margin:0 auto;min-height:100vh;background:var(--cream-100);display:flex;flex-direction:column;position:relative;}
+  .view{display:none;}
+  .view.active{display:block;}
+  .hidden{display:none !important;}
+
+  header.top{background:linear-gradient(180deg,var(--navy-900),var(--navy-950));color:var(--cream-100);padding:22px 20px 26px;position:relative;overflow:hidden;}
+  header.top::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle, rgba(201,147,47,0.18), transparent 70%);}
+  .badge-row{display:flex;align-items:center;gap:12px;position:relative;z-index:1;}
+  .shield{width:auto;height:46px;flex-shrink:0;object-fit:contain;}
+  .wordmark{font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:22px;letter-spacing:0.02em;line-height:1.05;}
+  .wordmark small{display:block;font-family:'Source Sans 3',sans-serif;font-weight:500;font-size:12.5px;letter-spacing:0.06em;color:var(--gold-400);margin-top:2px;}
+  .today-line{margin-top:18px;font-size:14.5px;color:var(--cream-200);position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;}
+  .today-line b{color:var(--cream-100);}
+  .logout-link{color:var(--gold-400);font-size:12.5px;font-weight:600;text-decoration:none;cursor:pointer;background:none;border:none;font-family:inherit;}
+
+  .role-tag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;background:var(--gold-500);color:var(--navy-950);padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:middle;}
+
+  main.pad{padding:22px 18px 150px;flex:1;}
+
+  /* ---------- AUTH SCREEN ---------- */
+  .auth-wrap{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:30px 26px;background:linear-gradient(180deg,var(--navy-950),var(--navy-900));}
+  .auth-card{background:var(--cream-100);border-radius:14px;padding:26px 22px;box-shadow:0 20px 40px -14px rgba(0,0,0,0.5);}
+  .auth-shield{width:52px;height:58px;display:block;margin:0 auto 10px;}
+  .auth-title{font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:22px;text-align:center;color:var(--navy-900);margin-bottom:2px;}
+  .auth-sub{text-align:center;font-size:13px;color:#8a8270;margin-bottom:20px;}
+  .field{margin-bottom:13px;}
+  .field label{display:block;font-size:12.5px;font-weight:600;color:var(--navy-800);margin-bottom:5px;letter-spacing:0.01em;}
+  .field input, .field textarea, .field select{width:100%;padding:10px 11px;border:1px solid var(--cream-200);background:#fff;border-radius:7px;font-family:'Source Sans 3',sans-serif;font-size:14.5px;color:var(--ink);}
+  .field textarea{resize:vertical;min-height:56px;}
+  .row2{display:flex;gap:10px;}
+  .row2 .field{flex:1;}
+  .btn{width:100%;padding:12px;border-radius:8px;border:none;font-weight:700;font-size:14.5px;cursor:pointer;font-family:'Source Sans 3',sans-serif;}
+  .btn.primary{background:var(--navy-900);color:var(--cream-100);}
+  .btn.ghost{background:none;color:var(--navy-800);border:1px solid var(--cream-200);}
+  .btn.danger{background:none;color:var(--red-600);}
+  .auth-toggle{text-align:center;margin-top:14px;font-size:13px;color:#5b5648;}
+  .auth-toggle a{color:var(--navy-800);font-weight:700;cursor:pointer;text-decoration:underline;}
+  .auth-error{background:#f6d9d1;color:#a8402b;font-size:13px;border-radius:8px;padding:9px 12px;margin-bottom:12px;}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 2px;margin-bottom:10px;}
+  .toggle-row .label{font-size:14px;font-weight:600;color:var(--navy-800);}
+  .switch{position:relative;width:44px;height:26px;flex-shrink:0;}
+  .switch input{opacity:0;width:0;height:0;}
+  .slider{position:absolute;inset:0;background:var(--cream-200);border-radius:26px;transition:0.15s;cursor:pointer;}
+  .slider::before{content:"";position:absolute;height:20px;width:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:0.15s;box-shadow:0 1px 3px rgba(0,0,0,0.25);}
+  .switch input:checked + .slider{background:var(--gold-500);}
+  .switch input:checked + .slider::before{transform:translateX(18px);}
+
+  /* ---------- AGENDA ---------- */
+  .section-heading{font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:15.5px;color:var(--navy-900);margin:22px 0 10px;display:flex;justify-content:space-between;align-items:center;}
+  .section-heading:first-child{margin-top:0;}
+  .add-mini{background:var(--navy-900);color:var(--gold-400);border:none;border-radius:6px;padding:5px 10px;font-size:12.5px;font-weight:700;cursor:pointer;}
+  .item{display:flex;gap:12px;background:#fff;border-radius:8px;padding:12px;margin-bottom:8px;border:1px solid var(--cream-200);}
+  .item.done{opacity:0.5;}
+  .item.overdue{border-color:var(--red-600);}
+  .item-time{font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:15px;color:var(--navy-800);min-width:74px;}
+  .item-time small{display:block;font-family:'Source Sans 3',sans-serif;font-weight:500;font-size:10.5px;color:#9a927e;margin-top:2px;}
+  .item-body{flex:1;min-width:0;}
+  .item-title{font-weight:600;font-size:15px;line-height:1.3;}
+  .item.done .item-title{text-decoration:line-through;}
+  .item-note{font-size:13px;color:#5b5648;margin-top:2px;line-height:1.35;}
+  .item-tags{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+  .tag{font-size:10.5px;font-weight:600;letter-spacing:0.03em;text-transform:uppercase;padding:2px 7px;border-radius:20px;background:var(--cream-200);color:#6b6350;}
+  .tag.reminder{background:#fbeed2;color:#8a641a;}
+  .item-actions{display:flex;flex-direction:column;gap:6px;align-items:center;}
+  .icon-btn{background:none;border:none;cursor:pointer;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;color:#9a927e;}
+  .icon-btn:hover{background:var(--cream-200);}
+  .icon-btn.check.active{color:var(--green-600);}
+  .empty-state{text-align:center;padding:26px 20px;color:#8a8270;font-size:13.5px;}
+
+  /* ---------- FAB / TAB BAR ---------- */
+  .fab{position:fixed;max-width:520px;width:100%;pointer-events:none;bottom:0;left:50%;transform:translateX(-50%);}
+  .fab-inner{position:absolute;bottom:88px;right:22px;pointer-events:auto;}
+  .fab-btn{width:56px;height:56px;border-radius:50%;background:var(--navy-900);border:2px solid var(--gold-500);color:var(--gold-400);font-size:28px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px -6px rgba(16,28,48,0.6);cursor:pointer;}
+
+  nav.tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--navy-950);display:flex;border-top:1px solid rgba(255,255,255,0.08);z-index:40;}
+  nav.tabbar button{flex:1;background:none;border:none;color:#8494ac;padding:10px 0 12px;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:'Source Sans 3',sans-serif;font-size:11px;font-weight:600;cursor:pointer;}
+  nav.tabbar button.active{color:var(--gold-400);}
+  nav.tabbar svg{width:20px;height:20px;}
+
+  /* ---------- MODAL SHEET ---------- */
+  .overlay{position:fixed;inset:0;background:rgba(16,20,30,0.5);display:none;align-items:flex-end;justify-content:center;z-index:50;}
+  .overlay.show{display:flex;}
+  .sheet{background:var(--cream-100);width:100%;max-width:520px;border-radius:16px 16px 0 0;padding:20px 20px 24px;max-height:88vh;overflow-y:auto;}
+  .sheet-handle{width:36px;height:4px;background:var(--cream-200);border-radius:4px;margin:0 auto 14px;}
+  .sheet h2{font-family:'Barlow Semi Condensed',sans-serif;font-size:19px;color:var(--navy-900);margin:0 0 14px;}
+  .sheet-actions{display:flex;gap:10px;margin-top:16px;}
+  .sheet-actions .btn{flex:1;}
+
+  /* ---------- RADIO ---------- */
+  .channel-card{background:#fff;border:1px solid var(--cream-200);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+  .channel-card .cname{font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:15.5px;color:var(--navy-900);}
+  .channel-card .ccount{font-size:12px;color:#8a8270;margin-top:2px;}
+  .channel-card .go{color:var(--gold-500);font-size:20px;}
+  .channel-status{display:flex;align-items:center;justify-content:space-between;background:var(--navy-900);color:var(--cream-100);border-radius:10px;padding:13px 16px;margin-bottom:16px;}
+  .channel-status .name{font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:15.5px;}
+  .channel-status .count{font-size:12px;color:var(--cream-200);margin-top:2px;}
+  .channel-status .leave{background:none;border:1px solid rgba(255,255,255,0.3);color:var(--cream-200);border-radius:6px;padding:6px 11px;font-size:12.5px;cursor:pointer;font-weight:600;}
+  .participants{list-style:none;padding:0;margin:0 0 26px;}
+  .participants li{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--cream-200);border-radius:8px;padding:11px 13px;margin-bottom:7px;}
+  .participants .dot{width:9px;height:9px;border-radius:50%;background:#c7bfa8;flex-shrink:0;}
+  .participants li.talking .dot{background:var(--green-600);box-shadow:0 0 0 4px rgba(63,107,74,0.18);}
+  .participants .pname{flex:1;font-weight:600;font-size:14.5px;}
+  .participants .ptag{font-size:11px;color:#8a8270;}
+  .participants li.talking .ptag{color:var(--green-600);font-weight:600;}
+  .ptt-wrap{display:flex;flex-direction:column;align-items:center;margin-top:8px;}
+  .ptt-btn{width:150px;height:150px;border-radius:50%;background:var(--navy-900);border:4px solid var(--gold-500);color:var(--cream-100);font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;cursor:pointer;user-select:none;touch-action:none;box-shadow:0 10px 26px -10px rgba(16,28,48,0.6);transition:transform 0.1s, background 0.15s;}
+  .ptt-btn.active{background:var(--red-600);border-color:#e2b299;transform:scale(1.05);}
+  .ptt-hint{margin-top:14px;font-size:12.5px;color:#8a8270;text-align:center;}
+  .mic-warning{background:#fbeed2;color:#8a641a;border-radius:8px;padding:10px 13px;font-size:13px;margin-bottom:14px;}
+
+  /* ---------- MAP ---------- */
+  #mapContainer{width:100%;height:calc(100vh - 260px);min-height:340px;border-radius:10px;overflow:hidden;border:1px solid var(--cream-200);}
+  .map-toggle{background:#fff;border:1px solid var(--cream-200);border-radius:10px;padding:13px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
+  .map-toggle .label{font-weight:600;font-size:14.5px;color:var(--navy-800);}
+  .map-toggle .sub{font-size:12px;color:#8a8270;margin-top:1px;}
+
+  /* ---------- EMERGENCY ---------- */
+  .sos-fab{position:fixed;left:50%;transform:translateX(calc(-50% - 0px));bottom:96px;z-index:45;}
+  .sos-btn{width:60px;height:60px;border-radius:50%;background:var(--red-600);border:3px solid #fff;color:#fff;font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px -8px rgba(168,64,43,0.7);cursor:pointer;user-select:none;touch-action:none;position:fixed;left:18px;bottom:88px;z-index:45;}
+  .sos-btn.charging{background:#c0392b;}
+  .sos-progress{position:fixed;left:18px;bottom:88px;width:60px;height:60px;border-radius:50%;z-index:46;pointer-events:none;}
+  .sos-overlay{position:fixed;inset:0;background:rgba(120,20,10,0.92);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:30px;}
+  .sos-overlay.show{display:flex;}
+  .sos-overlay .siren{font-size:50px;margin-bottom:10px;}
+  .sos-overlay h2{font-family:'Barlow Semi Condensed',sans-serif;font-size:24px;margin:0 0 8px;}
+  .sos-overlay p{font-size:14.5px;margin:0 0 22px;color:#f3d9d3;}
+  .sos-overlay a.maplink{color:#ffe3b0;font-weight:700;text-decoration:underline;display:block;margin-bottom:22px;}
+  .sos-overlay button{background:#fff;color:var(--red-600);border:none;border-radius:8px;padding:13px 26px;font-weight:800;font-size:15px;cursor:pointer;}
+  .sos-overlay .acks{font-size:12.5px;margin-top:16px;color:#f3d9d3;}
+
+  .notice{margin:0 18px;font-size:12px;color:#8a8270;text-align:center;padding-top:8px;}
+  .admin-badge-inline{font-size:11px;background:var(--gold-500);color:var(--navy-950);padding:1px 7px;border-radius:10px;font-weight:700;margin-left:6px;}
+</style>
+</head>
+<body>
+
+<!-- ===================== AUTH SCREEN ===================== -->
+<div class="auth-wrap" id="authWrap">
+  <div class="auth-card">
+    <img class="auth-shield" src="logo.png" alt="Brasão da Guarda de São José" style="width:auto;height:110px;">
+    <div class="auth-title">Guarda de São José</div>
+    <div class="auth-sub" style="margin-bottom:4px;">Bairro do Alegre · Bragança PA</div>
+    <div class="auth-sub" id="authSubtitle">Entrar na sua conta</div>
+    <div class="auth-error hidden" id="authError"></div>
+
+    <div id="nameField" class="field hidden">
+      <label>Seu nome / codinome</label>
+      <input type="text" id="authName" placeholder="Ex.: Guarda Silva">
+    </div>
+    <div class="field">
+      <label>E-mail</label>
+      <input type="email" id="authEmail" placeholder="seuemail@exemplo.com">
+    </div>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="authPassword" placeholder="Mínimo 6 caracteres">
+    </div>
+    <div id="adminField" class="hidden">
+      <div class="toggle-row">
+        <div class="label">Sou administrador</div>
+        <label class="switch"><input type="checkbox" id="isAdminToggle"><span class="slider"></span></label>
+      </div>
+      <div class="field hidden" id="adminCodeField">
+        <label>Código de administrador</label>
+        <input type="password" id="adminCode" placeholder="Código fornecido pela coordenação">
+      </div>
+    </div>
+
+    <button class="btn primary" id="authSubmitBtn">Entrar</button>
+    <div class="auth-toggle">
+      <span id="authToggleText">Ainda não tem conta?</span> <a id="authToggleLink">Criar conta</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div class="app hidden" id="appRoot">
+
+  <!-- AGENDA -->
+  <div class="view active" id="viewAgenda">
+    <header class="top">
+      <div class="badge-row">
+        <img class="shield" src="logo.png" alt="Brasão da Guarda de São José">
+        <div class="wordmark">GUARDA DE SÃO JOSÉ<span class="role-tag" id="roleTag">GUARDA</span>
+          <small>BAIRRO DO ALEGRE · BRAGANÇA PA</small>
+        </div>
+      </div>
+      <div class="today-line">
+        <span>Olá, <b id="helloName">—</b></span>
+        <button class="logout-link" id="logoutBtn">Sair</button>
+      </div>
+    </header>
+    <main class="pad">
+      <div class="section-heading">Meus compromissos</div>
+      <div id="myList"><div class="empty-state">Nenhum compromisso atribuído a você.</div></div>
+
+      <div class="section-heading">
+        Escala da guarda
+        <button class="add-mini hidden" id="addSharedTag">geral</button>
+      </div>
+      <div id="sharedList"><div class="empty-state">Nenhum compromisso na escala geral.</div></div>
+    </main>
+  </div>
+
+  <!-- RADIO -->
+  <div class="view" id="viewRadio">
+    <header class="top">
+      <div class="badge-row">
+        <img class="shield" src="logo.png" alt="Brasão da Guarda de São José">
+        <div class="wordmark">CANAIS DE RÁDIO<small>VOZ VIA INTERNET</small></div>
+      </div>
+      <div class="today-line"><span>Escolha um canal para entrar</span></div>
+    </header>
+    <main class="pad">
+      <div id="channelListBox">
+        <div id="channelList"></div>
+        <button class="btn ghost hidden" id="newChannelBtn" style="margin-top:6px;">+ Novo canal</button>
+      </div>
+
+      <div id="channelJoinedBox" class="hidden">
+        <div class="mic-warning hidden" id="micWarning"></div>
+        <div class="channel-status">
+          <div><div class="name" id="activeChannelName">Canal</div><div class="count" id="participantCount">1 conectado</div></div>
+          <button class="leave" id="leaveChannelBtn">Sair</button>
+        </div>
+        <ul class="participants" id="participantList"></ul>
+        <div class="ptt-wrap">
+          <button class="ptt-btn" id="pttBtn">Segure<br>para falar</button>
+          <div class="ptt-hint">Mantenha pressionado enquanto fala. Solte para ouvir.</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MAPA -->
+  <div class="view" id="viewMap">
+    <header class="top">
+      <div class="badge-row">
+        <img class="shield" src="logo.png" alt="Brasão da Guarda de São José">
+        <div class="wordmark">MAPA DA GUARDA<small>LOCALIZAÇÃO EM TEMPO REAL</small></div>
+      </div>
+      <div class="today-line"><span>Só aparece quem ativou a localização</span></div>
+    </header>
+    <main class="pad">
+      <div class="map-toggle">
+        <div><div class="label">Compartilhar minha localização</div><div class="sub">Ative durante o plantão</div></div>
+        <label class="switch"><input type="checkbox" id="locToggle"><span class="slider"></span></label>
+      </div>
+      <div id="mapContainer"></div>
+    </main>
+  </div>
+
+  <!-- FAB (agenda, admin only) -->
+  <div class="fab" id="fabWrap">
+    <div class="fab-inner"><button class="fab-btn hidden" id="openAdd" aria-label="Novo compromisso">+</button></div>
+  </div>
+
+  <!-- SOS -->
+  <button class="sos-btn" id="sosBtn">SOS</button>
+
+  <!-- TAB BAR -->
+  <nav class="tabbar">
+    <button class="tab-btn active" data-tab="agenda">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+      Agenda
+    </button>
+    <button class="tab-btn" data-tab="radio">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="14" r="3"/><path d="M6.5 9.5a8 8 0 0 1 11 0M4 6.5a12 12 0 0 1 16 0"/></svg>
+      Rádio
+    </button>
+    <button class="tab-btn" data-tab="map">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 20l-6-2V4l6 2 6-2 6 2v16l-6-2-6 2z"/><path d="M9 6v14M15 4v14"/></svg>
+      Mapa
+    </button>
+  </nav>
+</div>
+
+<!-- Modal (compromisso) -->
+<div class="overlay" id="overlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2 id="sheetTitle">Novo compromisso</h2>
+    <div class="field"><label>Título</label><input type="text" id="fTitle" placeholder="Ex.: Ronda no portão 2"></div>
+    <div class="row2">
+      <div class="field"><label>Data</label><input type="date" id="fDate"></div>
+      <div class="field"><label>Hora</label><input type="time" id="fTime"></div>
+    </div>
+    <div class="field"><label>Observações</label><textarea id="fNote" placeholder="Detalhes do compromisso"></textarea></div>
+    <div class="field">
+      <label>Atribuir para</label>
+      <select id="fAssign"><option value="">Escala geral (todos)</option></select>
+    </div>
+    <div class="field">
+      <label>Repetir</label>
+      <select id="fRepeat"><option value="none">Não repetir</option><option value="daily">Todos os dias</option><option value="weekly">Toda semana</option></select>
+    </div>
+    <div class="toggle-row">
+      <div><div class="label">Alarme de lembrete</div><div class="sub">Avisa com som e notificação no horário</div></div>
+      <label class="switch"><input type="checkbox" id="fReminder" checked><span class="slider"></span></label>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn danger hidden" id="deleteBtn">Excluir</button>
+      <button class="btn ghost" id="cancelBtn">Cancelar</button>
+      <button class="btn primary" id="saveBtn">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal (novo canal) -->
+<div class="overlay" id="channelOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2>Novo canal de rádio</h2>
+    <div class="field"><label>Nome do canal</label><input type="text" id="newChannelName" placeholder="Ex.: Portaria"></div>
+    <div class="sheet-actions">
+      <button class="btn ghost" id="channelCancelBtn">Cancelar</button>
+      <button class="btn primary" id="channelSaveBtn">Criar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Alarme de compromisso -->
+<div class="alarm-banner" id="alarmBanner" style="position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-140%);width:calc(100% - 32px);max-width:488px;background:var(--navy-950);color:var(--cream-100);border-left:4px solid var(--gold-500);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;z-index:100;box-shadow:0 14px 30px -10px rgba(0,0,0,0.5);transition:transform 0.35s cubic-bezier(.2,.9,.3,1.2);">
+  <div style="font-size:22px;">🔔</div>
+  <div style="flex:1;"><b id="alarmTitle" style="display:block;font-size:14.5px;">Compromisso agora</b><span id="alarmTime" style="font-size:12.5px;color:var(--cream-200);"></span></div>
+  <button id="dismissAlarm" style="background:var(--gold-500);color:var(--navy-950);border:none;border-radius:6px;padding:7px 12px;font-weight:700;font-size:13px;cursor:pointer;">Ok</button>
+</div>
+
+<!-- SOS overlay -->
+<div class="sos-overlay" id="sosOverlay">
+  <div class="siren">🚨</div>
+  <h2 id="sosTitle">Emergência acionada</h2>
+  <p id="sosDesc"></p>
+  <a class="maplink hidden" id="sosMapLink" target="_blank">Ver localização no mapa</a>
+  <button id="sosAckBtn">Confirmar que vi</button>
+  <div class="acks" id="sosAcks"></div>
+</div>
+
+<div id="audioContainer" style="display:none;"></div>
+<div class="notice">Guarda São José — agenda, rádio, mapa e emergência em um só app.</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import {
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import {
+  getDatabase, ref, set, get, push, onValue, remove, update,
+  onDisconnect, serverTimestamp, child
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+
+/* ============================================================
+   FIREBASE SETUP
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyCbXMS0IP10YQ1wEfwQZAqiZXzks4qSjOw",
+  authDomain: "guarda-sao-jose.firebaseapp.com",
+  databaseURL: "https://guarda-sao-jose-default-rtdb.firebaseio.com",
+  projectId: "guarda-sao-jose",
+  storageBucket: "guarda-sao-jose.firebasestorage.app",
+  messagingSenderId: "630417916017",
+  appId: "1:630417916017:web:723ec1de0fed709a9b1bd0"
+};
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getDatabase(fbApp);
+
+// Troque esta senha por uma só sua e avise apenas quem for administrador de verdade.
+const ADMIN_CODE = "pKZTkc6MOpf!N$9q";
+
+let currentUser = null;   // { uid, email }
+let myProfile = null;     // { name, role }
+let allUsers = {};        // uid -> {name, role}
+
+/* ============================================================
+   AUTH SCREEN
+   ============================================================ */
+let authMode = 'login'; // 'login' | 'signup'
+const $ = (id) => document.getElementById(id);
+
+$('isAdminToggle') && $('isAdminToggle').addEventListener('change', (e)=>{
+  $('adminCodeField').classList.toggle('hidden', !e.target.checked);
+});
+
+$('authToggleLink').addEventListener('click', ()=>{
+  authMode = authMode === 'login' ? 'signup' : 'login';
+  updateAuthUI();
+});
+
+function updateAuthUI(){
+  const isSignup = authMode === 'signup';
+  $('authSubtitle').textContent = isSignup ? 'Criar sua conta' : 'Entrar na sua conta';
+  $('nameField').classList.toggle('hidden', !isSignup);
+  $('adminField').classList.toggle('hidden', !isSignup);
+  $('authSubmitBtn').textContent = isSignup ? 'Criar conta' : 'Entrar';
+  $('authToggleText').textContent = isSignup ? 'Já tem conta?' : 'Ainda não tem conta?';
+  $('authToggleLink').textContent = isSignup ? 'Entrar' : 'Criar conta';
+  $('authError').classList.add('hidden');
+}
+updateAuthUI();
+
+$('authSubmitBtn').addEventListener('click', async ()=>{
+  const email = $('authEmail').value.trim();
+  const password = $('authPassword').value;
+  $('authError').classList.add('hidden');
+  if(!email || !password){ showAuthError('Preencha e-mail e senha.'); return; }
+
+  try{
+    if(authMode === 'signup'){
+      const name = $('authName').value.trim();
+      if(!name){ showAuthError('Digite seu nome ou codinome.'); return; }
+      const wantsAdmin = $('isAdminToggle').checked;
+      let role = 'guarda';
+      if(wantsAdmin){
+        if($('adminCode').value !== ADMIN_CODE){ showAuthError('Código de administrador incorreto.'); return; }
+        role = 'admin';
+      }
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await set(ref(db, 'users/'+cred.user.uid), { name, role });
+    } else {
+      await signInWithEmailAndPassword(auth, email, password);
+    }
+  }catch(e){
+    showAuthError(traduzErro(e.code));
+  }
+});
+
+function showAuthError(msg){ $('authError').textContent = msg; $('authError').classList.remove('hidden'); }
+function traduzErro(code){
+  const map = {
+    'auth/email-already-in-use':'Este e-mail já tem cadastro.',
+    'auth/invalid-email':'E-mail inválido.',
+    'auth/weak-password':'Senha muito curta (mínimo 6 caracteres).',
+    'auth/user-not-found':'Conta não encontrada.',
+    'auth/wrong-password':'Senha incorreta.',
+    'auth/invalid-credential':'E-mail ou senha incorretos.'
+  };
+  return map[code] || 'Não foi possível concluir. Tente novamente.';
+}
+
+$('logoutBtn').addEventListener('click', ()=>{ signOut(auth); });
+
+/* ============================================================
+   AUTH STATE -> BOOTSTRAP APP
+   ============================================================ */
+onAuthStateChanged(auth, async (user)=>{
+  if(user){
+    currentUser = user;
+    const snap = await get(ref(db, 'users/'+user.uid));
+    myProfile = snap.exists() ? snap.val() : { name: user.email, role: 'guarda' };
+    $('authWrap').classList.add('hidden');
+    $('appRoot').classList.remove('hidden');
+    $('helloName').textContent = myProfile.name;
+    $('roleTag').textContent = myProfile.role === 'admin' ? 'ADMINISTRADOR' : 'GUARDA';
+    $('openAdd').classList.toggle('hidden', myProfile.role !== 'admin');
+    $('newChannelBtn').classList.toggle('hidden', myProfile.role !== 'admin');
+    watchUsers();
+    watchCompromissos();
+    watchChannels();
+    watchEmergencies();
+    maybeRequestNotifPermission();
+  } else {
+    currentUser = null; myProfile = null;
+    $('authWrap').classList.remove('hidden');
+    $('appRoot').classList.add('hidden');
+    teardownAll();
+  }
+});
+
+function teardownAll(){
+  leaveChannel();
+  stopLocationSharing();
+}
+
+/* ============================================================
+   TAB NAVIGATION
+   ============================================================ */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.dataset.tab;
+    $('viewAgenda').classList.toggle('active', tab==='agenda');
+    $('viewRadio').classList.toggle('active', tab==='radio');
+    $('viewMap').classList.toggle('active', tab==='map');
+    $('fabWrap').style.display = tab==='agenda' ? '' : 'none';
+    if(tab==='map') setTimeout(()=>{ if(leafletMap) leafletMap.invalidateSize(); }, 60);
+  });
+});
+
+/* ============================================================
+   USERS (para o seletor "Atribuir para" e nomes no rádio)
+   ============================================================ */
+function watchUsers(){
+  onValue(ref(db, 'users'), (snap)=>{
+    allUsers = snap.val() || {};
+    const sel = $('fAssign');
+    sel.innerHTML = '<option value="">Escala geral (todos)</option>' +
+      Object.entries(allUsers).map(([uid,u])=>`<option value="${uid}">${escapeHtml(u.name)}${u.role==='admin'?' (admin)':''}</option>`).join('');
+  });
+}
+
+/* ============================================================
+   AGENDA (compromissos)
+   ============================================================ */
+let compromissos = {}; // id -> obj
+let editingId = null;
+let firedAlarms = new Set();
+
+function pad(n){ return n.toString().padStart(2,'0'); }
+function todayISO(){ const d=new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function combinedDateTime(it){ return new Date(it.date+'T'+it.time+':00'); }
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmtDateLabel(iso){
+  const [y,m,d]=iso.split('-').map(Number);
+  const dt=new Date(y,m-1,d);
+  const t=new Date(); t.setHours(0,0,0,0);
+  const diffDays=Math.round((dt-t)/86400000);
+  const weekday=dt.toLocaleDateString('pt-BR',{weekday:'long'});
+  const full=dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'long'});
+  if(diffDays===0) return 'Hoje · '+full;
+  if(diffDays===1) return 'Amanhã · '+full;
+  return weekday.charAt(0).toUpperCase()+weekday.slice(1)+' · '+full;
+}
+
+function watchCompromissos(){
+  onValue(ref(db, 'compromissos'), (snap)=>{
+    compromissos = snap.val() || {};
+    renderAgenda();
+  });
+}
+
+function renderList(container, list){
+  if(list.length===0){ container.innerHTML = '<div class="empty-state">Nada por aqui.</div>'; return; }
+  const now = new Date();
+  container.innerHTML = list.map(it=>{
+    const dt = combinedDateTime(it);
+    const overdue = !it.done && dt < now;
+    const canEdit = myProfile.role === 'admin';
+    return `<div class="item ${it.done?'done':''} ${overdue?'overdue':''}" data-id="${it.id}">
+      <div class="item-time">${fmtDateLabel(it.date)}<small>${it.time}</small></div>
+      <div class="item-body">
+        <div class="item-title">${escapeHtml(it.title)}</div>
+        ${it.note?`<div class="item-note">${escapeHtml(it.note)}</div>`:''}
+        <div class="item-tags">
+          ${it.repeat && it.repeat!=='none'?`<span class="tag">${it.repeat==='daily'?'Diário':'Semanal'}</span>`:''}
+          ${it.reminder?'<span class="tag reminder">Alarme</span>':''}
+          ${overdue?'<span class="tag" style="background:#f6d9d1;color:#a8402b;">Atrasado</span>':''}
+        </div>
+      </div>
+      <div class="item-actions">
+        <button class="icon-btn check ${it.done?'active':''}" data-action="toggle" data-id="${it.id}" title="Concluir">${it.done?'✓':'○'}</button>
+        ${canEdit?`<button class="icon-btn" data-action="edit" data-id="${it.id}" title="Editar">✎</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAgenda(){
+  const list = Object.entries(compromissos).map(([id,v])=>({id, ...v}));
+  list.sort((a,b)=> combinedDateTime(a) - combinedDateTime(b));
+  const mine = list.filter(it => it.assignedTo === currentUser.uid);
+  const shared = list.filter(it => !it.assignedTo);
+  renderList($('myList'), mine);
+  renderList($('sharedList'), shared);
+  checkAlarms(list.filter(it => !it.done && (it.assignedTo === currentUser.uid || !it.assignedTo)));
+}
+
+const overlay = $('overlay');
+function openModal(item){
+  if(myProfile.role !== 'admin') return;
+  editingId = item ? item.id : null;
+  $('sheetTitle').textContent = item ? 'Editar compromisso' : 'Novo compromisso';
+  $('fTitle').value = item ? item.title : '';
+  $('fDate').value = item ? item.date : todayISO();
+  $('fTime').value = item ? item.time : '';
+  $('fNote').value = item ? (item.note||'') : '';
+  $('fAssign').value = item ? (item.assignedTo||'') : '';
+  $('fRepeat').value = item ? (item.repeat||'none') : 'none';
+  $('fReminder').checked = item ? !!item.reminder : true;
+  $('deleteBtn').classList.toggle('hidden', !item);
+  overlay.classList.add('show');
+}
+function closeModal(){ overlay.classList.remove('show'); }
+$('openAdd').addEventListener('click', ()=>openModal(null));
+$('cancelBtn').addEventListener('click', closeModal);
+overlay.addEventListener('click', (e)=>{ if(e.target===overlay) closeModal(); });
+
+$('saveBtn').addEventListener('click', async ()=>{
+  const title = $('fTitle').value.trim();
+  const date = $('fDate').value;
+  const time = $('fTime').value;
+  if(!title || !date || !time){ alert('Preencha título, data e hora.'); return; }
+  const data = {
+    title, date, time,
+    note: $('fNote').value.trim(),
+    assignedTo: $('fAssign').value || null,
+    repeat: $('fRepeat').value,
+    reminder: $('fReminder').checked,
+    done: false,
+    createdBy: currentUser.uid
+  };
+  if(editingId){
+    await update(ref(db, 'compromissos/'+editingId), data);
+  } else {
+    await push(ref(db, 'compromissos'), data);
+  }
+  closeModal();
+});
+$('deleteBtn').addEventListener('click', async ()=>{
+  if(editingId){ await remove(ref(db, 'compromissos/'+editingId)); }
+  closeModal();
+});
+
+document.addEventListener('click', async (e)=>{
+  const btn = e.target.closest('button[data-action]');
+  if(!btn) return;
+  const id = btn.dataset.id;
+  const item = compromissos[id];
+  if(!item) return;
+  if(btn.dataset.action==='toggle'){
+    const newDone = !item.done;
+    await update(ref(db, 'compromissos/'+id), { done: newDone });
+    if(newDone && item.repeat && item.repeat!=='none'){
+      const dt = combinedDateTime(item);
+      if(item.repeat==='daily') dt.setDate(dt.getDate()+1);
+      if(item.repeat==='weekly') dt.setDate(dt.getDate()+7);
+      const { id:_drop, ...rest } = item;
+      await push(ref(db, 'compromissos'), {...rest, done:false, date: dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate())});
+    }
+  } else if(btn.dataset.action==='edit'){
+    openModal({id, ...item});
+  }
+});
+
+function beep(){
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const now = ctx.currentTime;
+    [0,0.3,0.6].forEach(offset=>{
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.type='sine'; osc.frequency.value=880;
+      gain.gain.setValueAtTime(0.0001, now+offset);
+      gain.gain.linearRampToValueAtTime(0.3, now+offset+0.02);
+      gain.gain.linearRampToValueAtTime(0.0001, now+offset+0.25);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(now+offset); osc.stop(now+offset+0.3);
+    });
+  }catch(e){}
+}
+function maybeRequestNotifPermission(){
+  if('Notification' in window && Notification.permission==='default'){ Notification.requestPermission(); }
+}
+function showAlarmBanner(item){
+  $('alarmTitle').textContent = item.title;
+  $('alarmTime').textContent = fmtDateLabel(item.date)+' às '+item.time;
+  $('alarmBanner').style.transform = 'translateX(-50%) translateY(0)';
+  beep();
+  if('Notification' in window && Notification.permission==='granted'){
+    try{ new Notification('Guarda São José — '+item.title, {body: item.note||('Compromisso às '+item.time)}); }catch(e){}
+  }
+}
+$('dismissAlarm').addEventListener('click', ()=>{ $('alarmBanner').style.transform = 'translateX(-50%) translateY(-140%)'; });
+function checkAlarms(activeList){
+  const now = new Date();
+  activeList.forEach(it=>{
+    if(!it.reminder) return;
+    const dt = combinedDateTime(it);
+    const diff = now - dt;
+    if(diff >= 0 && diff < 60000 && !firedAlarms.has(it.id)){ firedAlarms.add(it.id); showAlarmBanner(it); }
+  });
+}
+setInterval(()=>{ if(myProfile) renderAgenda(); }, 30000);
+
+/* ============================================================
+   RÁDIO — canais + WebRTC + sinalização via Firebase Realtime DB
+   ============================================================ */
+const ICE_SERVERS = [{ urls: 'stun:stun.l.google.com:19302' }];
+let channels = {};
+let activeChannelId = null;
+let localStream = null;
+let talking = false;
+let peers = {};
+let knownPeers = {};
+let presenceListenerOff = null;
+let inboxListenerOff = null;
+
+function watchChannels(){
+  onValue(ref(db, 'channels'), (snap)=>{
+    channels = snap.val() || {};
+    if(Object.keys(channels).length === 0 && myProfile.role === 'admin'){
+      // semeia canais padrão na primeira vez
+      set(ref(db, 'channels'), {
+        portaria: { name: 'Portaria' },
+        ronda: { name: 'Ronda' },
+        administrativo: { name: 'Administrativo' }
+      });
+    }
+    renderChannelList();
+  });
+}
+function renderChannelList(){
+  const box = $('channelList');
+  const entries = Object.entries(channels);
+  if(entries.length===0){ box.innerHTML = '<div class="empty-state">Nenhum canal criado ainda.</div>'; return; }
+  box.innerHTML = entries.map(([id,c])=>`
+    <div class="channel-card" data-channel="${id}">
+      <div><div class="cname">${escapeHtml(c.name)}</div><div class="ccount">Toque para entrar</div></div>
+      <div class="go">›</div>
+    </div>`).join('');
+}
+$('channelList').addEventListener('click', (e)=>{
+  const card = e.target.closest('.channel-card');
+  if(card) joinChannel(card.dataset.channel);
+});
+$('newChannelBtn').addEventListener('click', ()=>{ $('newChannelName').value=''; $('channelOverlay').classList.add('show'); });
+$('channelCancelBtn').addEventListener('click', ()=>{ $('channelOverlay').classList.remove('show'); });
+$('channelSaveBtn').addEventListener('click', async ()=>{
+  const name = $('newChannelName').value.trim();
+  if(!name) return;
+  await push(ref(db, 'channels'), { name });
+  $('channelOverlay').classList.remove('show');
+});
+
+function presRef(channelId, uid){ return ref(db, 'radio/'+channelId+'/presence/'+uid); }
+function inboxRef(channelId, uid){ return ref(db, 'radio/'+channelId+'/inbox/'+uid); }
+
+async function joinChannel(channelId){
+  activeChannelId = channelId;
+  $('activeChannelName').textContent = channels[channelId] ? channels[channelId].name : 'Canal';
+  $('channelListBox').classList.add('hidden');
+  $('channelJoinedBox').classList.remove('hidden');
+
+  const micWarning = $('micWarning');
+  try{
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    localStream.getAudioTracks().forEach(t => t.enabled = false);
+    micWarning.classList.add('hidden');
+  }catch(e){
+    micWarning.textContent = 'Não foi possível acessar o microfone. Você poderá ouvir os outros, mas não falar.';
+    micWarning.classList.remove('hidden');
+    localStream = null;
+  }
+
+  const myPresRef = presRef(channelId, currentUser.uid);
+  await set(myPresRef, { name: myProfile.name, ts: Date.now(), talking:false });
+  onDisconnect(myPresRef).remove();
+
+  presenceListenerOff = onValue(ref(db, 'radio/'+channelId+'/presence'), (snap)=>{
+    const data = snap.val() || {};
+    const seen = new Set();
+    Object.entries(data).forEach(([uid, p])=>{
+      if(uid === currentUser.uid) return;
+      seen.add(uid);
+      const prev = knownPeers[uid];
+      if(prev && prev.talking !== p.talking){ if(p.talking) talkOnBeep(); else talkOffBeep(); }
+      knownPeers[uid] = p;
+      if(!peers[uid]){
+        if(currentUser.uid < uid){ initiateConnection(uid); }
+      }
+    });
+    Object.keys(knownPeers).forEach(uid=>{ if(!seen.has(uid)){ delete knownPeers[uid]; cleanupPeer(uid); } });
+    renderParticipants();
+  });
+
+  const myInboxRef = inboxRef(channelId, currentUser.uid);
+  inboxListenerOff = onValue(myInboxRef, async (snap)=>{
+    const msgs = snap.val();
+    if(!msgs) return;
+    await remove(myInboxRef);
+    for(const key of Object.keys(msgs)){ await handleSignal(msgs[key]); }
+  });
+}
+
+async function leaveChannel(){
+  if(!activeChannelId) return;
+  if(presenceListenerOff) presenceListenerOff();
+  if(inboxListenerOff) inboxListenerOff();
+  Object.keys(peers).forEach(cleanupPeer);
+  knownPeers = {};
+  if(localStream){ localStream.getTracks().forEach(t=>t.stop()); localStream = null; }
+  await remove(presRef(activeChannelId, currentUser.uid));
+  activeChannelId = null;
+  $('channelListBox').classList.remove('hidden');
+  $('channelJoinedBox').classList.add('hidden');
+}
+$('leaveChannelBtn').addEventListener('click', leaveChannel);
+
+function ensurePeer(peerId){
+  if(peers[peerId]) return peers[peerId];
+  const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+  const entry = { pc, connected:false, pendingCandidates: [] };
+  peers[peerId] = entry;
+  if(localStream){ localStream.getTracks().forEach(t => pc.addTrack(t, localStream)); }
+  pc.onicecandidate = (e)=>{ if(e.candidate) sendSignal(peerId, 'candidate', e.candidate.toJSON()); };
+  pc.ontrack = (e)=>{
+    let audioEl = document.getElementById('audio_'+peerId);
+    if(!audioEl){
+      audioEl = document.createElement('audio');
+      audioEl.id = 'audio_'+peerId; audioEl.autoplay = true; audioEl.setAttribute('playsinline','');
+      $('audioContainer').appendChild(audioEl);
+    }
+    audioEl.srcObject = e.streams[0];
+  };
+  pc.onconnectionstatechange = ()=>{ if(['failed','disconnected','closed'].includes(pc.connectionState)) cleanupPeer(peerId); };
+  return entry;
+}
+function cleanupPeer(peerId){
+  const entry = peers[peerId];
+  if(entry){ try{ entry.pc.close(); }catch(e){} }
+  delete peers[peerId];
+  const audioEl = document.getElementById('audio_'+peerId);
+  if(audioEl) audioEl.remove();
+}
+async function sendSignal(toId, type, data){
+  await push(inboxRef(activeChannelId, toId), { from: currentUser.uid, type, data });
+}
+async function initiateConnection(peerId){
+  const entry = ensurePeer(peerId);
+  const offer = await entry.pc.createOffer({ offerToReceiveAudio: true });
+  await entry.pc.setLocalDescription(offer);
+  await sendSignal(peerId, 'offer', { type: offer.type, sdp: offer.sdp });
+}
+async function handleSignal(msg){
+  const peerId = msg.from;
+  if(msg.type === 'offer'){
+    const entry = ensurePeer(peerId);
+    await entry.pc.setRemoteDescription(new RTCSessionDescription(msg.data));
+    for(const c of entry.pendingCandidates){ try{ await entry.pc.addIceCandidate(c); }catch(e){} }
+    entry.pendingCandidates = [];
+    const answer = await entry.pc.createAnswer();
+    await entry.pc.setLocalDescription(answer);
+    await sendSignal(peerId, 'answer', { type: answer.type, sdp: answer.sdp });
+  } else if(msg.type === 'answer'){
+    const entry = peers[peerId];
+    if(entry){
+      await entry.pc.setRemoteDescription(new RTCSessionDescription(msg.data));
+      for(const c of entry.pendingCandidates){ try{ await entry.pc.addIceCandidate(c); }catch(e){} }
+      entry.pendingCandidates = [];
+    }
+  } else if(msg.type === 'candidate'){
+    const entry = peers[peerId];
+    if(entry){
+      if(entry.pc.remoteDescription && entry.pc.remoteDescription.type){
+        try{ await entry.pc.addIceCandidate(msg.data); }catch(e){}
+      } else { entry.pendingCandidates.push(msg.data); }
+    }
+  }
+}
+function renderParticipants(){
+  const list = $('participantList');
+  const ids = Object.keys(knownPeers);
+  $('participantCount').textContent = (ids.length+1) + ' conectado' + (ids.length===0?'':'s');
+  const me = `<li class="${talking?'talking':''}"><span class="dot"></span><span class="pname">${escapeHtml(myProfile.name)} (você)</span><span class="ptag">${talking?'no ar':'ouvindo'}</span></li>`;
+  const others = ids.map(pid=>{
+    const p = knownPeers[pid];
+    return `<li class="${p.talking?'talking':''}"><span class="dot"></span><span class="pname">${escapeHtml(p.name)}</span><span class="ptag">${p.talking?'no ar':'ouvindo'}</span></li>`;
+  }).join('');
+  list.innerHTML = me + others;
+}
+
+let radioAudioCtx = null;
+function getRadioCtx(){ if(!radioAudioCtx) radioAudioCtx = new (window.AudioContext||window.webkitAudioContext)(); return radioAudioCtx; }
+function radioBeep(freq, duration){
+  try{
+    const ctx = getRadioCtx(); const now = ctx.currentTime;
+    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+    osc.type = 'sine'; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(0.22, now+0.015);
+    gain.gain.setValueAtTime(0.22, now+duration-0.03);
+    gain.gain.linearRampToValueAtTime(0.0001, now+duration);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(now); osc.stop(now+duration+0.02);
+  }catch(e){}
+}
+function talkOnBeep(){ radioBeep(1400, 0.09); }
+function talkOffBeep(){ radioBeep(820, 0.12); }
+
+const pttBtn = $('pttBtn');
+function startTalk(e){
+  e.preventDefault();
+  if(!localStream || !activeChannelId) return;
+  talking = true;
+  localStream.getAudioTracks().forEach(t=>t.enabled=true);
+  pttBtn.classList.add('active'); pttBtn.innerHTML = 'No ar';
+  talkOnBeep();
+  update(presRef(activeChannelId, currentUser.uid), { talking: true });
+  renderParticipants();
+}
+function stopTalk(){
+  if(!talking) return;
+  talking = false;
+  if(localStream) localStream.getAudioTracks().forEach(t=>t.enabled=false);
+  pttBtn.classList.remove('active'); pttBtn.innerHTML = 'Segure<br>para falar';
+  talkOffBeep();
+  if(activeChannelId) update(presRef(activeChannelId, currentUser.uid), { talking: false });
+  renderParticipants();
+}
+pttBtn.addEventListener('pointerdown', startTalk);
+pttBtn.addEventListener('pointerup', stopTalk);
+pttBtn.addEventListener('pointerleave', stopTalk);
+pttBtn.addEventListener('pointercancel', stopTalk);
+
+/* ============================================================
+   MAPA
+   ============================================================ */
+let leafletMap = null;
+let mapMarkers = {};
+let watchId = null;
+
+function initMap(){
+  if(leafletMap) return;
+  leafletMap = L.map('mapContainer').setView([-1.35, -47.5], 6); // ponto inicial genérico (Pará)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors', maxZoom: 19
+  }).addTo(leafletMap);
+}
+initMap();
+
+onAuthStateChanged(auth, (user)=>{
+  if(!user) return;
+  onValue(ref(db, 'locations'), (snap)=>{
+    const data = snap.val() || {};
+    Object.keys(mapMarkers).forEach(uid=>{ if(!data[uid]){ mapMarkers[uid].remove(); delete mapMarkers[uid]; } });
+    Object.entries(data).forEach(([uid, loc])=>{
+      if(!loc.lat || !loc.lng) return;
+      if(mapMarkers[uid]){
+        mapMarkers[uid].setLatLng([loc.lat, loc.lng]);
+      } else {
+        mapMarkers[uid] = L.marker([loc.lat, loc.lng]).addTo(leafletMap).bindPopup(escapeHtml(loc.name));
+      }
+    });
+  });
+});
+
+$('locToggle').addEventListener('change', (e)=>{
+  if(e.target.checked) startLocationSharing(); else stopLocationSharing();
+});
+function startLocationSharing(){
+  if(!navigator.geolocation){ alert('Este navegador não suporta localização.'); $('locToggle').checked=false; return; }
+  watchId = navigator.geolocation.watchPosition((pos)=>{
+    const myLocRef = ref(db, 'locations/'+currentUser.uid);
+    set(myLocRef, { name: myProfile.name, lat: pos.coords.latitude, lng: pos.coords.longitude, ts: Date.now() });
+    onDisconnect(myLocRef).remove();
+  }, (err)=>{ console.warn('Erro de localização', err); }, { enableHighAccuracy:true, maximumAge:10000 });
+}
+function stopLocationSharing(){
+  if(watchId!=null){ navigator.geolocation.clearWatch(watchId); watchId=null; }
+  if(currentUser) remove(ref(db, 'locations/'+currentUser.uid));
+}
+
+/* ============================================================
+   EMERGÊNCIA (SOS)
+   ============================================================ */
+let sosPressTimer = null;
+let dismissedIds = new Set();
+let currentSosId = null;
+
+const sosBtn = $('sosBtn');
+function sosStart(e){
+  e.preventDefault();
+  sosBtn.classList.add('charging');
+  sosPressTimer = setTimeout(triggerSOS, 2000);
+}
+function sosCancel(){
+  sosBtn.classList.remove('charging');
+  clearTimeout(sosPressTimer);
+}
+sosBtn.addEventListener('pointerdown', sosStart);
+sosBtn.addEventListener('pointerup', sosCancel);
+sosBtn.addEventListener('pointerleave', sosCancel);
+
+async function triggerSOS(){
+  sosBtn.classList.remove('charging');
+  let lat=null, lng=null;
+  try{
+    const pos = await new Promise((res,rej)=> navigator.geolocation.getCurrentPosition(res, rej, {timeout:4000}));
+    lat = pos.coords.latitude; lng = pos.coords.longitude;
+  }catch(e){}
+  await push(ref(db, 'emergencies'), {
+    uid: currentUser.uid, name: myProfile.name, lat, lng, ts: Date.now(), acks:{}
+  });
+}
+
+function watchEmergencies(){
+  onValue(ref(db, 'emergencies'), (snap)=>{
+    const data = snap.val() || {};
+    const entries = Object.entries(data).sort((a,b)=> b[1].ts - a[1].ts);
+    if(entries.length===0) return;
+    const [id, em] = entries[0];
+    const acked = em.acks && em.acks[currentUser.uid];
+    const isRecent = (Date.now() - em.ts) < 3*60*60*1000;
+    if(!acked && isRecent && !dismissedIds.has(id)){
+      currentSosId = id;
+      showSosAlert(id, em);
+    }
+    if(currentSosId === id){
+      const ackCount = em.acks ? Object.keys(em.acks).length : 0;
+      $('sosAcks').textContent = ackCount + ' pessoa(s) confirmaram que viram.';
+    }
+  });
+}
+function showSosAlert(id, em){
+  $('sosTitle').textContent = em.uid === currentUser.uid ? 'Você acionou a emergência' : 'Emergência: '+em.name;
+  $('sosDesc').textContent = new Date(em.ts).toLocaleString('pt-BR');
+  if(em.lat && em.lng){
+    $('sosMapLink').href = `https://www.google.com/maps?q=${em.lat},${em.lng}`;
+    $('sosMapLink').classList.remove('hidden');
+  } else {
+    $('sosMapLink').classList.add('hidden');
+  }
+  $('sosOverlay').classList.add('show');
+}
+$('sosAckBtn').addEventListener('click', async ()=>{
+  if(currentSosId){
+    await update(ref(db, 'emergencies/'+currentSosId+'/acks'), { [currentUser.uid]: true });
+    dismissedIds.add(currentSosId);
+  }
+  $('sosOverlay').classList.remove('show');
+});
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
+</script>
+</body>
+</html>

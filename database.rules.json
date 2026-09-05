@@ -1,0 +1,53 @@
+{
+  "rules": {
+    "users": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "compromissos": {
+      ".read": "auth != null",
+      "$id": {
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || (data.exists() && (data.child('assignedTo').val() === auth.uid || !data.child('assignedTo').exists())))"
+      }
+    },
+    "channels": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "radio": {
+      "$channelId": {
+        "presence": {
+          ".read": "auth != null",
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid"
+          }
+        },
+        "inbox": {
+          "$uid": {
+            ".read": "auth != null && auth.uid === $uid",
+            ".write": "auth != null"
+          }
+        }
+      }
+    },
+    "locations": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "emergencies": {
+      ".read": "auth != null",
+      "$id": {
+        ".write": "auth != null",
+        "acks": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid"
+          }
+        }
+      }
+    }
+  }
+}
