@@ -19,7 +19,7 @@ messaging.onBackgroundMessage((payload) => {
   });
 });
 
-const CACHE_NAME = 'guarda-sj-v1';
+const CACHE_NAME = 'guarda-sj-v2';
 const SHELL = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png', './logo.png'];
 
 self.addEventListener('install', (event) => {
@@ -40,9 +40,16 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const req = event.request;
-  // Não intercepta chamadas de rede em tempo real (fontes, storage, etc.)
   if (req.method !== 'GET') return;
+  // network-first: sempre tenta buscar a versão mais nova primeiro;
+  // só usa o cache se estiver sem internet.
   event.respondWith(
-    caches.match(req).then((cached) => cached || fetch(req).catch(() => cached))
+    fetch(req)
+      .then((res) => {
+        const resClone = res.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
+        return res;
+      })
+      .catch(() => caches.match(req))
   );
 });
