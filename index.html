@@ -276,6 +276,10 @@
 
       <div id="channelJoinedBox" class="hidden">
         <div class="mic-warning hidden" id="micWarning"></div>
+        <div class="mic-warning hidden" id="audioUnlockBanner" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <span>O navegador bloqueou o áudio automático. Toque para ativar.</span>
+          <button class="btn primary" id="audioUnlockBtn" style="width:auto;padding:8px 14px;">Ativar áudio</button>
+        </div>
         <div class="channel-status">
           <div><div class="name" id="activeChannelName">Canal</div><div class="count" id="participantCount">1 conectado</div></div>
           <button class="leave" id="leaveChannelBtn">Sair</button>
@@ -597,6 +601,9 @@ async function requestNotifPermissionThenSetupPush(){
 function teardownAll(){
   leaveChannel();
   stopLocationSharing();
+  Object.values(channelActivityListeners).forEach(off=>{ if(off) off(); });
+  channelActivityListeners = {};
+  channelActivityState = {};
 }
 
 /* ============================================================
@@ -795,6 +802,9 @@ function showGenericNotification(title, body){
   $('alarmTime').textContent = body;
   $('alarmBanner').style.transform = 'translateX(-50%) translateY(0)';
   beep();
+  if('Notification' in window && Notification.permission==='granted'){
+    try{ new Notification(title, { body }); }catch(e){}
+  }
 }
 function showAlarmBanner(item){
   $('alarmTitle').textContent = item.title;
@@ -846,7 +856,28 @@ function watchChannels(){
         administrativo: { name: 'Administrativo' }
       });
     }
+    Object.keys(channels).forEach(watchChannelActivity);
     renderChannelList();
+  });
+}
+
+let channelActivityState = {};
+let channelActivityListeners = {};
+function watchChannelActivity(channelId){
+  if(channelActivityListeners[channelId]) return;
+  channelActivityListeners[channelId] = onValue(ref(db, 'radio/'+channelId+'/presence'), (snap)=>{
+    const data = snap.val() || {};
+    const talkers = Object.entries(data).filter(([uid,p])=>p.talking);
+    const anyoneTalking = talkers.length > 0;
+    const wasActive = channelActivityState[channelId] || false;
+    if(anyoneTalking && !wasActive && activeChannelId !== channelId){
+      const isMe = talkers.some(([uid])=>uid === currentUser.uid);
+      if(!isMe){
+        const chName = channels[channelId] ? channels[channelId].name : 'Canal';
+        showGenericNotification('📻 '+chName+' está ativo', talkers[0][1].name+' começou a falar');
+      }
+    }
+    channelActivityState[channelId] = anyoneTalking;
   });
 }
 function renderChannelList(){
@@ -931,10 +962,19 @@ async function leaveChannel(){
   if(localStream){ localStream.getTracks().forEach(t=>t.stop()); localStream = null; }
   await remove(presRef(activeChannelId, currentUser.uid));
   activeChannelId = null;
+  $('audioUnlockBanner').classList.add('hidden');
   $('channelListBox').classList.remove('hidden');
   $('channelJoinedBox').classList.add('hidden');
 }
 $('leaveChannelBtn').addEventListener('click', leaveChannel);
+
+function showAudioUnlockBanner(){
+  $('audioUnlockBanner').classList.remove('hidden');
+}
+$('audioUnlockBtn').addEventListener('click', ()=>{
+  document.querySelectorAll('#audioContainer audio').forEach(el=>{ el.play().catch(()=>{}); });
+  $('audioUnlockBanner').classList.add('hidden');
+});
 
 function ensurePeer(peerId){
   if(peers[peerId]) return peers[peerId];
@@ -951,6 +991,8 @@ function ensurePeer(peerId){
       $('audioContainer').appendChild(audioEl);
     }
     audioEl.srcObject = e.streams[0];
+    const p = audioEl.play();
+    if(p && p.catch){ p.catch(()=>{ showAudioUnlockBanner(); }); }
   };
   pc.onconnectionstatechange = ()=>{
     if(knownPeers[peerId]) knownPeers[peerId].connState = pc.connectionState;
